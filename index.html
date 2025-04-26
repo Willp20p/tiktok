@@ -5,16 +5,162 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mi TikTok Personal</title>
   <style>
-    /* (CSS igual al anterior que teníamos, todo respetado) */
-    /* Solo añadimos un pequeño extra para la lista de comentarios */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: white;
+      font-family: sans-serif;
+      overflow-x: hidden;
+      color: #fff;
+    }
+    .video-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      padding: 20px 0;
+    }
+    .video-wrapper {
+      width: 100%;
+      max-width: 400px;
+      height: 700px;
+      margin: 0 auto;
+      background: #000;
+      overflow: hidden;
+      border-radius: 20px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      cursor: pointer;
+    }
+    .overlay {
+      position: absolute;
+      bottom: 90px;
+      left: 20px;
+      right: 20px;
+      color: white;
+      z-index: 2;
+      text-shadow: 0 0 5px rgba(0,0,0,0.8);
+    }
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+    .user img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+    .user-name {
+      font-weight: bold;
+    }
+    .title {
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 5px;
+    }
+    .desc {
+      font-size: 14px;
+      color: #ccc;
+      margin-top: 3px;
+    }
+    .like-btn, .comment-btn, .mute-btn {
+      position: absolute;
+      background: rgba(255,255,255,0.7);
+      border: none;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      transition: background 0.3s, color 0.3s;
+      z-index: 3;
+    }
+    .like-btn:hover, .comment-btn:hover, .mute-btn:hover {
+      background: rgba(255,255,255,1);
+    }
+    .like-btn.liked {
+      background: red;
+      color: white;
+    }
+    .like-count {
+      display: block;
+      margin-top: 5px;
+      text-align: center;
+      font-size: 14px;
+      color: #fff;
+    }
+    .like-btn {
+      bottom: 20px;
+      right: 20px;
+    }
+    .comment-btn {
+      bottom: 80px;
+      right: 20px;
+    }
+    .mute-btn {
+      top: 20px;
+      right: 20px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 5px;
+      background: #444;
+      margin-top: 5px;
+      position: relative;
+    }
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: red;
+    }
+    .comment-form {
+      display: none;
+      position: absolute;
+      bottom: 140px;
+      right: 20px;
+      width: 250px;
+      background: rgba(0,0,0,0.8);
+      padding: 10px;
+      border-radius: 10px;
+      z-index: 5;
+    }
+    .comment-form textarea {
+      width: 100%;
+      height: 50px;
+      resize: none;
+      padding: 5px;
+      font-size: 14px;
+      border-radius: 5px;
+    }
+    .comment-form button {
+      width: 100%;
+      margin-top: 5px;
+      padding: 5px;
+      background: red;
+      border: none;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+    }
     .comentarios-lista {
       margin-top: 10px;
-      max-height: 150px;
+      max-height: 100px;
       overflow-y: auto;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255,255,255,0.1);
       padding: 5px;
       border-radius: 5px;
-      font-size: 14px;
+      font-size: 13px;
     }
     .comentario {
       margin-bottom: 5px;
@@ -27,7 +173,7 @@
 <body>
 
 <div class="video-container" id="video-container">
-  <!-- Aquí se cargarán los videos -->
+  <!-- Aquí carga todo dinámicamente -->
 </div>
 
 <script>
@@ -59,12 +205,10 @@ async function cargarVideos() {
         <button class="mute-btn" id="mute-btn-${videoID}">🔇</button>
         <button class="comment-btn" id="comment-btn-${videoID}">💬</button>
         <button class="like-btn" id="like-btn-${videoID}">❤<div class="like-count" id="like-count-${videoID}">0</div></button>
-        <div class="comment-form" id="comment-form-${videoID}" style="display:none;">
+        <div class="comment-form" id="comment-form-${videoID}">
           <textarea id="comment-text-${videoID}" placeholder="Escribe tu comentario..."></textarea>
           <button id="send-comment-${videoID}">Enviar</button>
-          <div class="comentarios-lista" id="comentarios-lista-${videoID}">
-            <!-- Comentarios cargados aparecerán aquí -->
-          </div>
+          <div class="comentarios-lista" id="comentarios-lista-${videoID}"></div>
         </div>
       </div>
     `;
@@ -82,7 +226,6 @@ async function cargarVideos() {
     const likeCount = document.getElementById(`like-count-${videoID}`);
     const progress = document.getElementById(`progress-${videoID}`);
 
-    // Mostrar formulario de comentario y cargar comentarios
     commentButton.addEventListener('click', async () => {
       commentForm.style.display = commentForm.style.display === 'block' ? 'none' : 'block';
       if (commentForm.style.display === 'block') {
@@ -90,7 +233,6 @@ async function cargarVideos() {
       }
     });
 
-    // Enviar comentario
     sendCommentButton.addEventListener('click', async () => {
       const texto = commentText.value.trim();
       if (texto.length > 0) {
@@ -101,7 +243,6 @@ async function cargarVideos() {
       }
     });
 
-    // Cargar comentarios
     async function cargarComentarios(videoID) {
       const res = await fetch(`${endpoint}?action=getComentarios&videoID=${videoID}`);
       const comentarios = await res.json();
@@ -114,7 +255,6 @@ async function cargarVideos() {
       });
     }
 
-    // Likes
     const count = await (await fetch(`${endpoint}?action=getLikes&videoID=${videoID}`)).text();
     likeCount.textContent = count;
 
@@ -132,7 +272,6 @@ async function cargarVideos() {
       }
     });
 
-    // Mute global
     muteButton.addEventListener('click', () => {
       const videos = document.querySelectorAll('video');
       const muteButtons = document.querySelectorAll('.mute-btn');
@@ -141,7 +280,6 @@ async function cargarVideos() {
       muteButtons.forEach(btn => btn.textContent = newMutedState ? '🔇' : '🔊');
     });
 
-    // Barra de progreso
     video.addEventListener('timeupdate', () => {
       if (video.duration) {
         const porcentaje = (video.currentTime / video.duration) * 100;
@@ -149,7 +287,6 @@ async function cargarVideos() {
       }
     });
 
-    // Pausa / reproduce tocando el video
     video.addEventListener('click', () => {
       if (video.paused) {
         video.play();
