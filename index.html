@@ -77,7 +77,7 @@
     .like-btn {
       position: absolute;
       bottom: 20px;
-      left: 20px;
+      right: 20px;
       background: rgba(255,255,255,0.7);
       border: none;
       padding: 10px;
@@ -103,7 +103,7 @@
     }
     .mute-btn {
       position: absolute;
-      bottom: 20px;
+      top: 20px;
       right: 20px;
       background: rgba(255,255,255,0.7);
       border: none;
@@ -163,8 +163,8 @@ async function cargarVideos() {
           <div class="title">${data.title}</div>
           <div class="desc">${data.desc}</div>
         </div>
-        <button class="like-btn" id="like-btn-${videoID}">❤<div class="like-count" id="like-count-${videoID}">0</div></button>
         <button class="mute-btn" id="mute-btn-${videoID}">🔇</button>
+        <button class="like-btn" id="like-btn-${videoID}">❤<div class="like-count" id="like-count-${videoID}">0</div></button>
       </div>
     `;
 
@@ -195,10 +195,13 @@ async function cargarVideos() {
       }
     });
 
-    // Mute/Unmute video al tocar el icono
+    // Mute/Unmute global
     muteButton.addEventListener('click', () => {
-      video.muted = !video.muted;
-      muteButton.textContent = video.muted ? '🔇' : '🔊';
+      const videos = document.querySelectorAll('video');
+      const muteButtons = document.querySelectorAll('.mute-btn');
+      const isCurrentlyMuted = video.muted;
+      videos.forEach(v => v.muted = !isCurrentlyMuted);
+      muteButtons.forEach(btn => btn.textContent = isCurrentlyMuted ? '🔇' : '🔊');
     });
 
     // Barra de progreso
