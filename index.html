@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mi TikTok Personal</title>
   <style>
-    * {margin: 0; padding: 0; box-sizing: border-box;}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: white;
       font-family: sans-serif;
@@ -195,13 +195,14 @@ async function cargarVideos() {
       }
     });
 
-    // Mute/Unmute global
+    // Mute/Unmute global corregido
     muteButton.addEventListener('click', () => {
       const videos = document.querySelectorAll('video');
       const muteButtons = document.querySelectorAll('.mute-btn');
-      const isCurrentlyMuted = video.muted;
-      videos.forEach(v => v.muted = !isCurrentlyMuted);
-      muteButtons.forEach(btn => btn.textContent = isCurrentlyMuted ? '🔇' : '🔊');
+
+      const newMutedState = !videos[0].muted;
+      videos.forEach(v => v.muted = newMutedState);
+      muteButtons.forEach(btn => btn.textContent = newMutedState ? '🔇' : '🔊');
     });
 
     // Barra de progreso
