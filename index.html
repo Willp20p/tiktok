@@ -148,12 +148,14 @@
   const callback = (entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
+        entry.target.currentTime = 0;
         entry.target.play();
       } else {
         entry.target.pause();
+        entry.target.currentTime = 0;
       }
     });
-  }
+  };
 
   const observer = new IntersectionObserver(callback, options);
 
