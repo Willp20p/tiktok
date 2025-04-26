@@ -34,10 +34,10 @@
       position: absolute;
       right: 20px;
       bottom: 80px;
-      font-size: 32px;
+      font-size: 30px;
       cursor: pointer;
-      color: black;
-      transition: color 0.3s;
+      color: white;
+      transition: color 0.3s ease;
       z-index: 10;
       text-shadow: 0 0 10px black;
     }
@@ -63,7 +63,7 @@ fetch('videos.json')
 
       const video = document.createElement('video');
       video.src = videoData.src;
-      video.autoplay = index === 0; // Solo el primero autoplay
+      video.autoplay = index === 0;
       video.muted = false;
       video.loop = false;
       video.controls = false;
@@ -95,7 +95,7 @@ fetch('videos.json')
           entry.target.play();
         } else {
           entry.target.pause();
-          entry.target.currentTime = 0; // Reinicia cuando sale de pantalla
+          entry.target.currentTime = 0;
         }
       });
     }, { threshold: 0.8 });
