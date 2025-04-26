@@ -72,10 +72,14 @@
       border-radius: 50%;
       cursor: pointer;
       font-size: 20px;
-      transition: background 0.3s;
+      transition: background 0.3s, color 0.3s;
     }
     .like-btn:hover {
       background: rgba(255,255,255,1);
+    }
+    .like-btn.liked {
+      background: red;
+      color: white;
     }
     .video-block {
       display: flex;
@@ -115,7 +119,14 @@
           <button class="like-btn">❤</button>
         </div>
       `;
+
       container.appendChild(block);
+
+      // Activar cambio de color en corazón
+      const likeButton = block.querySelector('.like-btn');
+      likeButton.addEventListener('click', () => {
+        likeButton.classList.toggle('liked');
+      });
     });
 
     const videos = document.querySelectorAll('video');
@@ -145,10 +156,17 @@
     const observer = new IntersectionObserver(callback, options);
 
     videos.forEach(video => {
-      video.muted = true;
+      video.muted = true; // inicia todos en silencio
       observer.observe(video);
     });
   }
+
+  cargarVideos();
+</script>
+
+</body>
+</html>
+
 
   cargarVideos();
 </script>
