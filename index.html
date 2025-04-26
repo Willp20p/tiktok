@@ -87,86 +87,70 @@
 </head>
 <body>
 
-<div class="video-container">
-
-  <div class="video-block">
-    <div class="video-wrapper">
-      <video src="videos/video1.mp4" playsinline></video>
-      <div class="overlay">
-        <div class="user">
-          <img src="https://i.imgur.com/0y0y0y0.png" alt="Perfil">
-          <span class="user-name">@usuario1</span>
-        </div>
-        <div class="title">Video 1</div>
-        <div class="desc">Esta es la descripción del video 1</div>
-      </div>
-      <button class="like-btn">❤</button>
-    </div>
-  </div>
-
-  <div class="video-block">
-    <div class="video-wrapper">
-      <video src="videos/video2.mp4" playsinline></video>
-      <div class="overlay">
-        <div class="user">
-          <img src="https://i.imgur.com/0y0y0y0.png" alt="Perfil">
-          <span class="user-name">@usuario2</span>
-        </div>
-        <div class="title">Video 2</div>
-        <div class="desc">Descripción breve del segundo video</div>
-      </div>
-      <button class="like-btn">❤</button>
-    </div>
-  </div>
-
-  <div class="video-block">
-    <div class="video-wrapper">
-      <video src="videos/video3.mp4" playsinline></video>
-      <div class="overlay">
-        <div class="user">
-          <img src="https://i.imgur.com/0y0y0y0.png" alt="Perfil">
-          <span class="user-name">@usuario3</span>
-        </div>
-        <div class="title">Video 3</div>
-        <div class="desc">Tercer video, ¡disfrútalo!</div>
-      </div>
-      <button class="like-btn">❤</button>
-    </div>
-  </div>
-
+<div class="video-container" id="video-container">
+  <!-- Aquí se insertarán los videos dinámicamente -->
 </div>
 
 <script>
-  const videos = document.querySelectorAll('video');
+  async function cargarVideos() {
+    const response = await fetch('videos.json');
+    const videosData = await response.json();
 
-  const options = {
-    root: null,
-    rootMargin: '0px',
-    threshold: 0.7
-  };
+    const container = document.getElementById('video-container');
 
-  const callback = (entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        videos.forEach(v => { 
-          if (v !== entry.target) { v.pause(); v.currentTime = 0; }
-        });
-        entry.target.muted = false;
-        entry.target.currentTime = 0;
-        entry.target.play();
-      } else {
-        entry.target.pause();
-        entry.target.currentTime = 0;
-      }
+    videosData.forEach(data => {
+      const block = document.createElement('div');
+      block.className = 'video-block';
+      block.innerHTML = `
+        <div class="video-wrapper">
+          <video src="${data.src}" playsinline></video>
+          <div class="overlay">
+            <div class="user">
+              <img src="${data.userImage}" alt="Perfil">
+              <span class="user-name">${data.userName}</span>
+            </div>
+            <div class="title">${data.title}</div>
+            <div class="desc">${data.desc}</div>
+          </div>
+          <button class="like-btn">❤</button>
+        </div>
+      `;
+      container.appendChild(block);
     });
-  };
 
-  const observer = new IntersectionObserver(callback, options);
+    const videos = document.querySelectorAll('video');
 
-  videos.forEach(video => {
-    video.muted = true; // inicia todos en silencio
-    observer.observe(video);
-  });
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.7
+    };
+
+    const callback = (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          videos.forEach(v => { 
+            if (v !== entry.target) { v.pause(); v.currentTime = 0; }
+          });
+          entry.target.muted = false;
+          entry.target.currentTime = 0;
+          entry.target.play();
+        } else {
+          entry.target.pause();
+          entry.target.currentTime = 0;
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(callback, options);
+
+    videos.forEach(video => {
+      video.muted = true;
+      observer.observe(video);
+    });
+  }
+
+  cargarVideos();
 </script>
 
 </body>
