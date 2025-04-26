@@ -2,155 +2,106 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mi TikTok Personal</title>
   <style>
-    * {margin: 0; padding: 0; box-sizing: border-box;}
-    body {background: #000; font-family: sans-serif; overflow-x: hidden; color: #fff;}
-    .video-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 40px;
-      padding: 20px 0;
+    body {
+      margin: 0;
+      background: black;
+      overflow-x: hidden;
+      font-family: Arial, sans-serif;
     }
-    .video-wrapper {
+    .video-container {
       position: relative;
+      height: 100vh;
       width: 100%;
-      max-width: 400px;
-      height: 700px;
       overflow: hidden;
-      border-radius: 20px;
-      background: #111;
-      box-shadow: 0 0 20px rgba(255,255,255,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
     video {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     .overlay {
       position: absolute;
       bottom: 20px;
       left: 20px;
       color: white;
-      text-shadow: 0 0 5px rgba(0,0,0,0.8);
+      z-index: 10;
+      text-shadow: 0 0 10px black;
     }
-    .overlay .user {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 5px;
-    }
-    .overlay .user img {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 2px solid white;
-    }
-    .overlay .user-name {
-      font-weight: bold;
-    }
-    .overlay .title {
-      font-weight: bold;
-      font-size: 18px;
-    }
-    .overlay .desc {
-      font-size: 14px;
-      color: #ccc;
-    }
-    .like-btn {
+    .heart {
       position: absolute;
-      bottom: 20px;
       right: 20px;
-      background: rgba(255,255,255,0.7);
-      border: none;
-      padding: 10px;
-      border-radius: 50%;
+      bottom: 80px;
+      font-size: 32px;
       cursor: pointer;
-      font-size: 20px;
-      transition: background 0.3s;
+      color: black;
+      transition: color 0.3s;
+      z-index: 10;
+      text-shadow: 0 0 10px black;
     }
-    .like-btn:hover {
-      background: rgba(255,255,255,1);
-    }
-    .video-block {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
+    .heart.liked {
+      color: red;
     }
   </style>
 </head>
 <body>
 
-<div class="video-container" id="video-container">
-  <!-- Aquí se insertarán los videos dinámicamente -->
-</div>
+<div id="app"></div>
 
 <script>
-  async function cargarVideos() {
-    const response = await fetch('videos.json');
-    const videosData = await response.json();
+// Cargar videos desde videos.json
+fetch('videos.json')
+  .then(response => response.json())
+  .then(videos => {
+    const app = document.getElementById('app');
 
-    const container = document.getElementById('video-container');
+    videos.forEach((videoData, index) => {
+      const container = document.createElement('div');
+      container.className = 'video-container';
 
-    videosData.forEach(data => {
-      const block = document.createElement('div');
-      block.className = 'video-block';
-      block.innerHTML = `
-        <div class="video-wrapper">
-          <video src="${data.src}" playsinline></video>
-          <div class="overlay">
-            <div class="user">
-              <img src="${data.userImage}" alt="Perfil">
-              <span class="user-name">${data.userName}</span>
-            </div>
-            <div class="title">${data.title}</div>
-            <div class="desc">${data.desc}</div>
-          </div>
-          <button class="like-btn">❤</button>
-        </div>
-      `;
-      container.appendChild(block);
+      const video = document.createElement('video');
+      video.src = videoData.src;
+      video.autoplay = index === 0; // Solo el primero autoplay
+      video.muted = false;
+      video.loop = false;
+      video.controls = false;
+      video.playsInline = true;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+      overlay.innerHTML = `<h2>${videoData.title}</h2><p>${videoData.description}</p>`;
+
+      const heart = document.createElement('div');
+      heart.className = 'heart';
+      heart.innerHTML = '♥';
+
+      heart.addEventListener('click', () => {
+        heart.classList.toggle('liked');
+      });
+
+      container.appendChild(video);
+      container.appendChild(overlay);
+      container.appendChild(heart);
+      app.appendChild(container);
     });
 
-    const videos = document.querySelectorAll('video');
-
-    const options = {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.7
-    };
-
-    const callback = (entries) => {
+    // Lógica para pausar y reproducir videos según scroll
+    let videosEls = document.querySelectorAll('video');
+    let observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          videos.forEach(v => { 
-            if (v !== entry.target) { v.pause(); v.currentTime = 0; }
-          });
-          entry.target.muted = false;
-          entry.target.currentTime = 0;
           entry.target.play();
         } else {
           entry.target.pause();
-          entry.target.currentTime = 0;
+          entry.target.currentTime = 0; // Reinicia cuando sale de pantalla
         }
       });
-    };
+    }, { threshold: 0.8 });
 
-    const observer = new IntersectionObserver(callback, options);
-
-    videos.forEach(video => {
-      video.muted = true;
-      observer.observe(video);
-    });
-  }
-
-  cargarVideos();
+    videosEls.forEach(video => observer.observe(video));
+  });
 </script>
 
 </body>
